@@ -1,0 +1,41 @@
+importcsv
+ importrequests
+ frombs4importBeautifulSoup
+ defscrape_product_info(url):
+   #SendaGETrequest totheURL
+   response=requests.get(url)
+   
+   #ParsetheHTMLcontentof thepage
+   soup=BeautifulSoup(response.text, 'html.parser')
+   
+   #Extractproduct information
+   products=[]
+   forproduct insoup.find_all('div',class_='s-result-item'):
+       name=product.find('span',class_='a-text-normal').text.strip()
+       price_tag=product.find('span',class_='a-offscreen')
+       ifprice_tag:
+           price=price_tag.text.strip()
+       else:
+           price='Notavailable'
+       rating_tag=product.find('span',class_='a-icon-alt')
+       ifrating_tag:
+           rating=rating_tag.text.strip()
+       else:
+           rating='Notavailable'
+       products.append({'Name':name, 'Price':price, 'Rating':rating})
+   
+   returnproducts
+ defsave_to_csv(products, filename):
+   #Writeproduct informationtoaCSVfile
+   withopen(filename,mode='w',newline='',encoding='utf-8')asfile:
+       writer=csv.DictWriter(file, fieldnames=['Name', 'Price', 'Rating'])
+       writer.writeheader()
+       forproduct inproducts:
+           writer.writerow(product)
+ defmain():
+   url='https://www.amazon.com/s?k=laptop' #ExampleURLofAmazonlaptopsearchresults
+   products=scrape_product_info(url)
+   save_to_csv(products, 'amazon_laptop_products.csv')
+   print('Product informationhasbeenscrapedandsavedtoamazon_laptop_products.csv')
+ if__name__=='__main__':
+   main()
